@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Assessment Hub - Intelligent Conferencing Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #00f5ff;
+  --secondary: #7b2fff;
+  --accent: #ff6b35;
+  --bg-dark: #020818;
+  --bg-card: #0a1628;
+  --bg-panel: #0d1f3c;
+  --text-main: #e0f0ff;
+  --text-muted: #6b8cae;
+  --border: rgba(0,245,255,0.2);
+  --glow: 0 0 20px rgba(0,245,255,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg-dark);color:var(--text-main);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+
+/* Animated background */
+body::before{
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  background:radial-gradient(ellipse at 20% 20%,rgba(0,245,255,0.05) 0%,transparent 50%),
+             radial-gradient(ellipse at 80% 80%,rgba(123,47,255,0.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* Particle canvas */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(2,8,24,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:70px;
+}
+.nav-logo{
+  font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;
+  color:var(--primary);letter-spacing:2px;
+  display:flex;align-items:center;gap:12px;
+}
+.nav-logo .logo-icon{
+  width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--secondary));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;box-shadow:var(--glow);
+}
+.nav-links{display:flex;align-items:center;gap:8px;}
+.nav-links a{
+  color:var(--text-muted);text-decoration:none;padding:8px 18px;
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:0.95rem;
+  letter-spacing:1px;text-transform:uppercase;border-radius:6px;
+  transition:all 0.3s;position:relative;
+}
+.nav-links a:hover,.nav-links a.active{color:var(--primary);background:rgba(0,245,255,0.1);}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--primary);transition:width 0.3s;border-radius:2px;
+}
+.nav-links a:hover::after,.nav-links a.active::after{width:80%;}
+.nav-cta{
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#000!important;font-weight:700!important;
+  padding:10px 24px!important;border-radius:8px!important;
+}
+.nav-cta:hover{transform:scale(1.05);box-shadow:var(--glow);}
+.nav-cta::after{display:none!important;}
+
+/* HERO */
+.hero{
+  position:relative;z-index:2;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:100px 40px 60px;text-align:center;
+}
+.hero-content{max-width:900px;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.3);
+  padding:6px 20px;border-radius:50px;margin-bottom:30px;
+  font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--primary);
+  animation:pulse-border 2s infinite;
+}
+@keyframes pulse-border{0%,100%{border-color:rgba(0,245,255,0.3);}50%{border-color:rgba(0,245,255,0.8);}}
+.hero-badge .dot{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+h1{
+  font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,6vw,5rem);
+  font-weight:900;line-height:1.1;margin-bottom:20px;
+  background:linear-gradient(135deg,#fff 0%,var(--primary) 50%,var(--secondary) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-size:1.3rem;color:var(--text-muted);max-width:650px;margin:0 auto 40px;
+  line-height:1.7;font-weight:400;
+}
+.hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#000;font-weight:700;padding:16px 40px;border-radius:10px;
+  text-decoration:none;font-family:'Orbitron',sans-serif;font-size:0.9rem;
+  letter-spacing:1px;transition:all 0.3s;box-shadow:var(--glow);display:inline-block;
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(0,245,255,0.5);}
+.btn-secondary{
+  background:transparent;color:var(--primary);font-weight:700;padding:16px 40px;
+  border-radius:10px;text-decoration:none;font-family:'Orbitron',sans-serif;font-size:0.9rem;
+  letter-spacing:1px;border:2px solid var(--primary);transition:all 0.3s;display:inline-block;
+}
+.btn-secondary:hover{background:rgba(0,245,255,0.1);transform:translateY(-3px);}
+
+/* STATS BAR */
+.stats-bar{
+  position:relative;z-index:2;
+  background:rgba(10,22,40,0.8);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:30px 40px;display:flex;justify-content:center;gap:60px;flex-wrap:wrap;
+}
+.stat-item{text-align:center;}
+.stat-num{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:var(--primary);}
+.stat-label{color:var(--text-muted);font-size:0.85rem;letter-spacing:1px;text-transform:uppercase;}
+
+/* FEATURES SECTION */
+section{position:relative;z-index:2;padding:80px 40px;}
+.section-header{text-align:center;margin-bottom:60px;}
+.section-tag{
+  font-family:'Share Tech Mono',monospace;color:var(--accent);font-size:0.85rem;
+  letter-spacing:3px;text-transform:uppercase;display:block;margin-bottom:12px;
+}
+.section-title{
+  font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,4vw,3rem);
+  font-weight:900;margin-bottom:16px;
+}
+.section-desc{color:var(--text-muted);font-size:1.1rem;max-width:600px;margin:0 auto;}
+
+.features-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:24px;max-width:1200px;margin:0 auto;
+}
+.feature-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
+  padding:32px;position:relative;overflow:hidden;transition:all 0.4s;cursor:default;
+}
+.feature-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--primary),transparent);
+  transform:scaleX(0);transition:transform 0.4s;
+}
+.feature-card:hover{transform:translateY(-6px);border-color:rgba(0,245,255,0.5);box-shadow:0 20px 40px rgba(0,0,0,0.3),var(--glow);}
+.feature-card:hover::before{transform:scaleX(1);}
+.feature-icon{
+  width:60px;height:60px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;font-size:1.8rem;margin-bottom:20px;
+}
+.feature-card h3{font-family:'Orbitron',sans-serif;font-size:1rem;margin-bottom:12px;color:#fff;}
+.feature-card p{color:var(--text-muted);line-height:1.7;font-size:0.95rem;}
+
+/* AI FACE section */
+.ai-face-section{
+  background:var(--bg-panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.ai-face-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1100px;margin:0 auto;
+}
+.ai-face-visual{
+  position:relative;width:100%;padding-top:100%;border-radius:20px;overflow:hidden;
+}
+.ai-face-inner{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,rgba(0,245,255,0.1) 0%,var(--bg-dark) 70%);
+  display:flex;align-items:center;justify-content:center;border:2px solid var(--border);
+  border-radius:20px;
+}
+.face-ring{
+  position:absolute;border-radius:50%;border:2px solid rgba(0,245,255,0.3);animation:rotate-ring 8s linear infinite;
+}
+.face-ring:nth-child(1){width:80%;height:80%;animation-duration:8s;}
+.face-ring:nth-child(2){width:60%;height:60%;animation-duration:5s;animation-direction:reverse;border-color:rgba(123,47,255,0.3);}
+.face-ring:nth-child(3){width:40%;height:40%;animation-duration:12s;}
+@keyframes rotate-ring{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.face-core{
+  width:80px;height:80px;background:linear-gradient(135deg,var(--primary),var(--secondary));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:2rem;z-index:1;box-shadow:0 0 40px rgba(0,245,255,0.5);
+  animation:pulse-core 2s ease-in-out infinite;
+}
+@keyframes pulse-core{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}]
+.sense-dots{position:absolute;inset:0;}
+.sense-dot{
+  position:absolute;width:10px;height:10px;background:var(--primary);border-radius:50%;
+  animation:sense-pulse 2s ease-in-out infinite;box-shadow:0 0 10px var(--primary);
+}
+.ai-face-info h2{font-family:'Orbitron',sans-serif;font-size:2rem;margin-bottom:20px;}
+.ai-face-info p{color:var(--text-muted);line-height:1.8;margin-bottom:20px;}
+.sense-list{list-style:none;}
+.sense-list li{
+  display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);color:var(--text-muted);
+}
+.sense-list li .sense-num{
+  font-family:'Orbitron',sans-serif;color:var(--primary);font-size:0.8rem;min-width:40px;
+}
+
+/* HOW IT WORKS */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;max-width:1100px;margin:0 auto;}
+.step-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:16px;
+  padding:32px 24px;text-align:center;position:relative;transition:all 0.3s;
+}
+.step-card:hover{transform:translateY(-4px);border-color:rgba(0,245,255,0.4);}
+.step-num{
+  font-family:'Orbitron',sans-serif;font-size:3rem;font-weight:900;
+  color:rgba(0,245,255,0.15);position:absolute;top:16px;right:20px;
+}
+.step-icon{font-size:2.5rem;margin-bottom:16px;}
+.step-card h3{font-family:'Orbitron',sans-serif;font-size:0.95rem;margin-bottom:12px;color:#fff;}
+.step-card p{color:var(--text-muted);font-size:0.9rem;line-height:1.6;}
+
+/* TRANSLATION showcase */
+.translation-section{background:var(--bg-panel);}
+.translation-demo{
+  max-width:800px;margin:0 auto;background:var(--bg-card);
+  border:1px solid var(--border);border-radius:20px;overflow:hidden;
+}
+.trans-header{
+  background:linear-gradient(135deg,rgba(0,245,255,0.1),rgba(123,47,255,0.1));
+  padding:20px 30px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.trans-modes{display:flex;gap:12px;}
+.trans-mode-btn{
+  background:rgba(0,245,255,0.1);color:var(--primary);border:1px solid rgba(0,245,255,0.3);
+  padding:8px 20px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-weight:600;
+  cursor:pointer;transition:all 0.3s;font-size:0.9rem;
+}
+.trans-mode-btn.active{background:var(--primary);color:#000;}
+.trans-body{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;padding:30px;align-items:start;}
+.trans-box{background:var(--bg-dark);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.trans-box .lang{font-size:0.75rem;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.trans-box .text{font-size:1.05rem;line-height:1.7;}
+.trans-arrow{font-size:1.5rem;color:var(--primary);display:flex;align-items:center;}
+
+/* CTA */
+.cta-section{
+  text-align:center;padding:100px 40px;
+  background:radial-gradient(ellipse at center,rgba(0,245,255,0.05) 0%,transparent 70%);
+}
+.cta-section h2{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,4vw,3rem);margin-bottom:20px;}
+.cta-section p{color:var(--text-muted);font-size:1.1rem;margin-bottom:40px;}
+
+/* FOOTER */
+footer{
+  background:var(--bg-panel);border-top:1px solid var(--border);
+  padding:60px 40px 30px;
+}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto 40px;}
+.footer-brand .nav-logo{margin-bottom:16px;}
+.footer-brand p{color:var(--text-muted);font-size:0.9rem;line-height:1.7;}
+.footer-col h4{font-family:'Orbitron',sans-serif;font-size:0.8rem;letter-spacing:2px;margin-bottom:16px;color:var(--primary);}
+.footer-col a{display:block;color:var(--text-muted);text-decoration:none;padding:5px 0;font-size:0.9rem;transition:color 0.2s;}
+.footer-col a:hover{color:var(--primary);}
+.footer-bottom{
+  border-top:1px solid var(--border);padding-top:24px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  max-width:1200px;margin:0 auto;color:var(--text-muted);font-size:0.85rem;
+}
+
+/* Mobile hamburger */
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;}
+.hamburger span{display:block;width:24px;height:2px;background:var(--primary);transition:all 0.3s;}
+
+@media(max-width:768px){
+  .hamburger{display:flex;}
+  .nav-links{display:none;position:absolute;top:70px;left:0;right:0;background:rgba(2,8,24,0.98);flex-direction:column;padding:20px;border-bottom:1px solid var(--border);}
+  .nav-links.open{display:flex;}
+  .ai-face-grid{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .stats-bar{gap:30px;}
+  .trans-body{grid-template-columns:1fr;gap:12px;}
+  .trans-arrow{transform:rotate(90deg);}
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-icon">🧠</div>
+    AI Assessment Hub
+  </div>
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html" class="active">Home</a>
+    <a href="about.html">About</a>
+    <a href="conference-login.html">Conference Login</a>
+    <a href="admin-login.html">Admin Login</a>
+    <a href="conference-login.html" class="nav-cta">Join Conference</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      LIVE — AI-Powered Platform Active
+    </div>
+    <h1>AI Assessment Hub</h1>
+    <p class="hero-sub">
+      Next-generation intelligent conferencing with real-time AI translation, 140-point facial sense analysis, and secure WebRTC video collaboration across all languages.
+    </p>
+    <div class="hero-buttons">
+      <a href="conference-login.html" class="btn-primary">Join Conference</a>
+      <a href="about.html" class="btn-secondary">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num">140</div>
+    <div class="stat-label">AI Sense Points</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">50+</div>
+    <div class="stat-label">Languages</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">WebRTC</div>
+    <div class="stat-label">Real-Time Video</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">99.9%</div>
+    <div class="stat-label">Uptime SLA</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">2-Way</div>
+    <div class="stat-label">Translation</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section>
+  <div class="section-header">
+    <span class="section-tag">Platform Features</span>
+    <h2 class="section-title">Everything You Need to Collaborate</h2>
+    <p class="section-desc">Enterprise-grade AI conferencing built for the modern world</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,245,255,0.1)">🎥</div>
+      <h3>HD Video Conferencing</h3>
+      <p>Crystal-clear WebRTC video with adaptive bitrate, noise cancellation, and up to 100 participants per session.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(123,47,255,0.1)">🌐</div>
+      <h3>Real-Time Translation</h3>
+      <p>Voice-to-voice and voice-to-text translation in 50+ languages. Break language barriers instantly during live conferences.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,107,53,0.1)">🧠</div>
+      <h3>140 AI Sense Points</h3>
+      <p>Advanced facial motion analysis with 140 landmark points for emotion detection, attention tracking, and engagement scoring.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(0,245,255,0.1)">🔐</div>
+      <h3>Admin Control Panel</h3>
+      <p>Full administrative dashboard with conference creation, user approval workflows, real-time monitoring, and complete website editing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(123,47,255,0.1)">📊</div>
+      <h3>Assessment Analytics</h3>
+      <p>Detailed participant analytics, engagement metrics, assessment scores, and exportable reports for every session.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(255,107,53,0.1)">🔗</div>
+      <h3>Shareable Conference Links</h3>
+      <p>Generate secure, time-limited conference links. Admin approves participants before they can join any session.</p>
+    </div>
+  </div>
+</section>
+
+<!-- AI FACE MOTION -->
+<section class="ai-face-section">
+  <div class="ai-face-grid">
+    <div class="ai-face-visual">
+      <div class="ai-face-inner">
+        <div class="face-ring"></div>
+        <div class="face-ring"></div>
+        <div class="face-ring"></div>
+        <div class="sense-dots" id="senseDots"></div>
+        <div class="face-core">🤖</div>
+      </div>
+    </div>
+    <div class="ai-face-info">
+      <span class="section-tag">AI FACE MOTION</span>
+      <h2 class="section-title" style="font-size:2rem;">140-Point Facial Intelligence</h2>
+      <p>Our proprietary AI engine maps 140 precise facial landmarks in real-time, enabling deep behavioral analysis during assessment conferences.</p>
+      <ul class="sense-list">
+        <li><span class="sense-num">01.</span> Real-time emotion detection & classification</li>
+        <li><span class="sense-num">02.</span> Attention & engagement scoring</li>
+        <li><span class="sense-num">03.</span> Eye-tracking & gaze analysis</li>
+        <li><span class="sense-num">04.</span> Micro-expression recognition</li>
+        <li><span class="sense-num">05.</span> Fatigue & stress indicators</li>
+        <li><span class="sense-num">06.</span> Identity verification (anti-spoofing)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-header">
+    <span class="section-tag">Process</span>
+    <h2 class="section-title">How It Works</h2>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-icon">🔑</div>
+      <h3>Request Access</h3>
+      <p>Register and submit a conference access request. Admin reviews and approves your participation.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-icon">✅</div>
+      <h3>Admin Approves</h3>
+      <p>The administrator reviews your credentials and approves or rejects your conference access instantly.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-icon">🎥</div>
+      <h3>Join Conference</h3>
+      <p>Enter the secure WebRTC conference with full HD video, audio, and AI-powered features enabled.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-icon">🌐</div>
+      <h3>Translate Live</h3>
+      <p>Enable real-time voice translation — English to Hindi, Hindi to English, or any supported language pair.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSLATION DEMO -->
+<section class="translation-section">
+  <div class="section-header">
+    <span class="section-tag">Translation Engine</span>
+    <h2 class="section-title">Live Language Translation</h2>
+    <p class="section-desc">Two powerful modes: Voice-to-Voice and Voice-to-Text</p>
+  </div>
+  <div class="translation-demo">
+    <div class="trans-header">
+      <span style="font-family:'Orbitron',sans-serif;font-size:0.9rem;">TRANSLATION PREVIEW</span>
+      <div class="trans-modes">
+        <button class="trans-mode-btn active" onclick="setMode(this,'voice')">🎙️ Voice to Voice</button>
+        <button class="trans-mode-btn" onclick="setMode(this,'text')">📝 Voice to Text</button>
+      </div>
+    </div>
+    <div class="trans-body">
+      <div class="trans-box">
+        <div class="lang">🇺🇸 English</div>
+        <div class="text" id="srcText">Welcome to the AI Assessment Hub conference. Please enable your camera and microphone to begin.</div>
+      </div>
+      <div class="trans-arrow">➜</div>
+      <div class="trans-box">
+        <div class="lang" id="tgtLang">🇮🇳 Hindi</div>
+        <div class="text" id="tgtText">AI Assessment Hub कॉन्फ्रेंस में आपका स्वागत है। कृपया शुरू करने के लिए अपना कैमरा और माइक्रोफ़ोन सक्षम करें।</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Ready to Transform Your Conferences?</h2>
+  <p>Join thousands of organizations using AI Assessment Hub for smarter, more connected meetings.</p>
+  <div class="hero-buttons">
+    <a href="conference-login.html" class="btn-primary">Start Conference</a>
+    <a href="admin-login.html" class="btn-secondary">Admin Panel</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo" style="margin-bottom:16px;">
+        <div class="logo-icon">🧠</div>
+        AI Assessment Hub
+      </div>
+      <p>Next-generation AI-powered conferencing platform with real-time translation, facial analysis, and secure collaboration tools.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="conference-login.html">Conference Login</a>
+      <a href="admin-login.html">Admin Login</a>
+    </div>
+    <div class="footer-col">
+      <h4>Features</h4>
+      <a href="#">Video Conference</a>
+      <a href="#">AI Translation</a>
+      <a href="#">Face Analysis</a>
+      <a href="#">Analytics</a>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <a href="about.html#contact">Contact Us</a>
+      <a href="#">Documentation</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 AI Assessment Hub. All rights reserved.</span>
+    <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:rgba(0,245,255,0.5);">POWERED BY ANTHROPIC AI · WEBRTC · DEEPGRAM</span>
+  </div>
+</footer>
+
+<script>
+// Particle system
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+
+const particles = [];
+for(let i=0;i<80;i++){
+  particles.push({
+    x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+    vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3,
+    r:Math.random()*2+0.5, opacity:Math.random()*0.5+0.1
+  });
+}
+function drawParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=canvas.width; if(p.x>canvas.width)p.x=0;
+    if(p.y<0)p.y=canvas.height; if(p.y>canvas.height)p.y=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,245,255,${p.opacity})`;ctx.fill();
+  });
+  // Connect nearby
+  particles.forEach((a,i)=>{
+    particles.slice(i+1).forEach(b=>{
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<100){
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(0,245,255,${0.05*(1-d/100)})`;ctx.stroke();
+      }
+    });
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// Sense dots
+const dotsEl = document.getElementById('senseDots');
+if(dotsEl){
+  for(let i=0;i<20;i++){
+    const d=document.createElement('div');
+    d.className='sense-dot';
+    const angle=Math.random()*Math.PI*2, r=20+Math.random()*40;
+    d.style.cssText=`left:calc(50% + ${Math.cos(angle)*r}%);top:calc(50% + ${Math.sin(angle)*r}%);
+      animation-delay:${Math.random()*2}s;opacity:${0.4+Math.random()*0.6};`;
+    dotsEl.appendChild(d);
+  }
+}
+
+function setMode(btn,mode){
+  document.querySelectorAll('.trans-mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(mode==='text'){
+    document.getElementById('tgtText').style.fontFamily="'Share Tech Mono',monospace";
+    document.getElementById('tgtText').style.fontSize='0.9rem';
+  } else {
+    document.getElementById('tgtText').style.fontFamily='';
+    document.getElementById('tgtText').style.fontSize='';
+  }
+}
+
+function toggleMenu(){
+  document.getElementById('navLinks').classList.toggle('open');
+}
+</script>
+</body>
+</html>
