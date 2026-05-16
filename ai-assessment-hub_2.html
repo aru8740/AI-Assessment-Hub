@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Assessment Hub</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+  :root {
+    --blue: #0E71EB;
+    --blue-dark: #0556b3;
+    --blue-light: #e8f1fd;
+    --green: #00C896;
+    --orange: #FF8C00;
+    --red: #E53935;
+    --bg: #F7F8FA;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --text: #1A1A2E;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.13);
+    --radius: 12px;
+    --radius-lg: 18px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── LOADING SCREEN ── */
+  #loading {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #0E71EB;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px;
+    transition: opacity .5s, visibility .5s;
+  }
+  #loading.hide { opacity: 0; visibility: hidden; }
+  .loader-logo { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .loader-logo span { opacity: .6; }
+  .loader-bar { width: 200px; height: 4px; background: rgba(255,255,255,.3); border-radius: 99px; overflow: hidden; }
+  .loader-fill { height: 100%; background: #fff; border-radius: 99px; animation: loadFill 1.6s ease forwards; }
+  @keyframes loadFill { from { width:0 } to { width:100% } }
+  .loader-sub { color: rgba(255,255,255,.75); font-size: .9rem; }
+
+  /* ── TOP NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    height: 60px;
+    display: flex; align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.15rem; color: var(--blue); display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .nav-logo i { font-size: 1.3rem; }
+  .nav-links { display: flex; align-items: center; gap: 4px; margin-left: 24px; }
+  .nav-link { padding: 6px 14px; border-radius: 8px; font-size: .9rem; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all .15s; border: none; background: none; }
+  .nav-link:hover, .nav-link.active { background: var(--blue-light); color: var(--blue); }
+  .nav-spacer { flex: 1; }
+  .nav-actions { display: flex; align-items: center; gap: 10px; }
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; border-radius: 8px; font-size: .88rem; font-weight: 600; cursor: pointer; border: none; transition: all .15s; font-family: inherit; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(14,113,235,.35); }
+  .btn-outline { background: transparent; color: var(--blue); border: 1.5px solid var(--blue); }
+  .btn-outline:hover { background: var(--blue-light); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-danger:hover { background: #c62828; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { background: #00a87e; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; cursor: pointer; flex-shrink: 0; }
+
+  /* ── LAYOUT ── */
+  .app-layout { display: flex; min-height: calc(100vh - 60px); }
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+    position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto;
+  }
+  .sidebar-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); padding: 10px 10px 4px; margin-top: 8px; }
+  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 9px; font-size: .9rem; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all .15s; border: none; background: none; width: 100%; text-align: left; }
+  .sidebar-item i { width: 18px; text-align: center; font-size: .95rem; }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
+  .sidebar-badge { margin-left: auto; background: var(--blue); color: #fff; font-size: .68rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; }
+  .main { flex: 1; padding: 28px 32px; min-width: 0; }
+
+  /* ── PAGE HEADER ── */
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
+  .page-header p { color: var(--text-muted); font-size: .95rem; margin-top: 4px; }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 8px; transition: box-shadow .2s; }
+  .stat-card:hover { box-shadow: var(--shadow); }
+  .stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .stat-icon.blue { background: #e8f1fd; color: var(--blue); }
+  .stat-icon.green { background: #e0faf3; color: var(--green); }
+  .stat-icon.orange { background: #fff4e0; color: var(--orange); }
+  .stat-icon.red { background: #fdecea; color: var(--red); }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 1.85rem; font-weight: 800; color: var(--text); }
+  .stat-label { font-size: .82rem; color: var(--text-muted); }
+  .stat-delta { font-size: .78rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.down { color: var(--red); }
+
+  /* ── CARDS ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 22px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; }
+  .card-sub { font-size: .82rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── API KEYS TABLE ── */
+  .api-table { width: 100%; border-collapse: collapse; }
+  .api-table th { text-align: left; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); padding: 0 14px 12px; border-bottom: 2px solid var(--border); }
+  .api-table td { padding: 14px; border-bottom: 1px solid var(--border); font-size: .9rem; vertical-align: middle; }
+  .api-table tr:last-child td { border-bottom: none; }
+  .api-table tr:hover td { background: var(--bg); }
+  .key-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; font-family: 'DM Mono', monospace; font-size: .78rem; color: var(--text); max-width: 320px; overflow: hidden; }
+  .key-badge span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .key-type { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; font-size: .77rem; font-weight: 600; }
+  .key-type.webrtc { background: #e8f1fd; color: var(--blue); }
+  .key-type.translation { background: #e0faf3; color: var(--green); }
+  .key-type.backup { background: #fff4e0; color: var(--orange); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; box-shadow: 0 0 0 3px rgba(0,200,150,.2); }
+  .status-dot.inactive { background: var(--text-muted); box-shadow: none; }
+  .action-btns { display: flex; gap: 6px; }
+  .icon-btn { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-size: .85rem; transition: all .15s; }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
+  .icon-btn.copy:hover { background: var(--blue-light); color: var(--blue); border-color: var(--blue); }
+  .icon-btn.del:hover { background: #fdecea; color: var(--red); border-color: var(--red); }
+
+  /* ── PARTICIPANTS TABLE ── */
+  .participants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .participant-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; position: relative; }
+  .participant-card .p-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: #fff; }
+  .participant-card .p-name { font-weight: 600; font-size: .9rem; }
+  .participant-card .p-role { font-size: .78rem; color: var(--text-muted); }
+  .participant-card .p-score { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--blue); }
+  .p-status { position: absolute; top: 10px; right: 10px; }
+
+  /* ── VIDEO GRID ── */
+  .video-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .video-tile { background: #1a1a2e; border-radius: var(--radius); aspect-ratio: 16/9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; position: relative; overflow: hidden; }
+  .video-tile .cam-off { color: rgba(255,255,255,.3); font-size: 2rem; }
+  .video-tile .tile-name { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,.6); color: #fff; font-size: .78rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+  .video-tile .tile-mic { position: absolute; bottom: 10px; right: 10px; color: rgba(255,255,255,.5); font-size: .85rem; }
+  .video-tile.self { border: 2px solid var(--blue); }
+  .video-tile.speaking { border: 2px solid var(--green); }
+  .cam-controls { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 16px; background: #1a1a2e; border-radius: var(--radius); }
+  .cam-btn { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; border: none; transition: all .2s; }
+  .cam-btn.on { background: rgba(255,255,255,.15); color: #fff; }
+  .cam-btn.off { background: var(--red); color: #fff; }
+  .cam-btn.end { background: var(--red); color: #fff; padding: 0 20px; border-radius: 24px; width: auto; font-size: .85rem; font-weight: 700; gap: 7px; }
+  .cam-btn:hover { transform: scale(1.08); }
+
+  /* ── TRANSLATION PANEL ── */
+  .translate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .lang-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .9rem; font-family: inherit; background: var(--surface); color: var(--text); cursor: pointer; }
+  .lang-select:focus { outline: none; border-color: var(--blue); }
+  textarea.translate-input { width: 100%; min-height: 110px; padding: 12px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .9rem; font-family: inherit; resize: vertical; background: var(--surface); color: var(--text); transition: border .15s; }
+  textarea.translate-input:focus { outline: none; border-color: var(--blue); }
+  .translate-output { min-height: 110px; padding: 12px; border: 1.5px solid var(--border); background: var(--surface2); border-radius: 9px; font-size: .9rem; color: var(--text); }
+  .translate-actions { display: flex; gap: 10px; margin-top: 12px; }
+
+  /* ── MODAL ── */
+  .modal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all .2s; }
+  .modal-overlay.show { opacity: 1; visibility: visible; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 500px; box-shadow: var(--shadow-lg); transform: translateY(12px) scale(.97); transition: transform .2s; }
+  .modal-overlay.show .modal { transform: none; }
+  .modal-header { padding: 22px 24px 0; display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .modal-close:hover { background: var(--surface2); color: var(--text); }
+  .modal-body { padding: 18px 24px; }
+  .modal-footer { padding: 0 24px 22px; display: flex; justify-content: flex-end; gap: 10px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .form-input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .9rem; font-family: inherit; color: var(--text); transition: border .15s; }
+  .form-input:focus { outline: none; border-color: var(--blue); }
+  .form-hint { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── TOAST ── */
+  #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9998; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast { background: var(--text); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: .88rem; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-lg); transform: translateX(120%); transition: transform .3s cubic-bezier(.34,1.56,.64,1); pointer-events: auto; max-width: 320px; }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background: #14532d; border-left: 4px solid var(--green); }
+  .toast.error { background: #7f1d1d; border-left: 4px solid var(--red); }
+  .toast.info { background: #1e3a5f; border-left: 4px solid var(--blue); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar { height: 7px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: var(--blue); transition: width .4s; }
+  .progress-fill.green { background: var(--green); }
+  .progress-fill.orange { background: var(--orange); }
+
+  /* ── SECTION TABS ── */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 10px; padding: 4px; margin-bottom: 22px; width: fit-content; }
+  .tab { padding: 7px 18px; border-radius: 7px; font-size: .88rem; font-weight: 600; cursor: pointer; border: none; background: none; color: var(--text-muted); transition: all .15s; font-family: inherit; }
+  .tab.active { background: var(--surface); color: var(--blue); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+
+  /* ── SECTION VISIBILITY ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── ADMIN LOGIN ── */
+  .login-wrap { min-height: calc(100vh - 60px); display: flex; align-items: center; justify-content: center; }
+  .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); }
+  .login-logo { text-align: center; margin-bottom: 28px; }
+  .login-logo i { font-size: 2.5rem; color: var(--blue); }
+  .login-logo h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; margin-top: 8px; }
+  .login-logo p { color: var(--text-muted); font-size: .88rem; margin-top: 4px; }
+
+  /* ── ASSESSMENT LIST ── */
+  .assessment-item { display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; background: var(--surface); transition: box-shadow .15s; cursor: pointer; }
+  .assessment-item:hover { box-shadow: var(--shadow); }
+  .assessment-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .assessment-info { flex: 1; min-width: 0; }
+  .assessment-info h4 { font-weight: 600; font-size: .95rem; }
+  .assessment-info p { color: var(--text-muted); font-size: .8rem; margin-top: 2px; }
+  .assessment-meta { text-align: right; flex-shrink: 0; }
+  .assessment-meta .score { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--blue); }
+  .assessment-meta .date { font-size: .78rem; color: var(--text-muted); }
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; font-size: .75rem; font-weight: 600; }
+  .chip.active { background: #e0faf3; color: var(--green); }
+  .chip.pending { background: #fff4e0; color: var(--orange); }
+  .chip.closed { background: var(--surface2); color: var(--text-muted); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .video-grid { grid-template-columns: 1fr 1fr; }
+    .translate-grid { grid-template-columns: 1fr; }
+    .main { padding: 18px; }
+  }
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr; }
+    .video-grid { grid-template-columns: 1fr; }
+    nav { padding: 0 14px; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="loader-logo">AI Assessment<span>Hub</span></div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="loader-sub">Initializing APIs &amp; WebRTC…</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#"><i class="fa-solid fa-brain"></i> AI Assessment Hub</a>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="switchSection('dashboard', this)">Dashboard</button>
+    <button class="nav-link" onclick="switchSection('meetings', this)">Meetings</button>
+    <button class="nav-link" onclick="switchSection('assessments', this)">Assessments</button>
+    <button class="nav-link" onclick="switchSection('translation', this)">Translation</button>
+    <button class="nav-link" onclick="switchSection('apikeys', this)">API Keys</button>
+    <button class="nav-link" onclick="switchSection('admin', this)">Admin</button>
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="nav-actions">
+    <button class="btn btn-outline" onclick="openModal('newMeetingModal')"><i class="fa-solid fa-video"></i> New Meeting</button>
+    <div class="avatar" title="Admin User" onclick="toast('Profile settings coming soon','info')">AU</div>
+  </div>
+</nav>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Main</div>
+    <button class="sidebar-item active" onclick="switchSection('dashboard', null, this)"><i class="fa-solid fa-gauge-high"></i> Dashboard</button>
+    <button class="sidebar-item" onclick="switchSection('meetings', null, this)"><i class="fa-solid fa-video"></i> Meetings <span class="sidebar-badge">3</span></button>
+    <button class="sidebar-item" onclick="switchSection('assessments', null, this)"><i class="fa-solid fa-clipboard-list"></i> Assessments</button>
+    <button class="sidebar-item" onclick="switchSection('translation', null, this)"><i class="fa-solid fa-language"></i> Translation</button>
+    <div class="sidebar-label">System</div>
+    <button class="sidebar-item" onclick="switchSection('apikeys', null, this)"><i class="fa-solid fa-key"></i> API Keys</button>
+    <button class="sidebar-item" onclick="switchSection('admin', null, this)"><i class="fa-solid fa-user-shield"></i> Admin</button>
+    <button class="sidebar-item" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+    <div style="flex:1"></div>
+    <div style="padding:12px 10px;border-top:1px solid var(--border);margin-top:12px">
+      <div style="font-size:.78rem;color:var(--text-muted)">System Status</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:.82rem;font-weight:600;color:var(--green)"><span class="status-dot"></span> All APIs Online</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div id="sec-dashboard" class="section active">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Welcome back — here's what's happening today.</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fa-solid fa-video"></i></div>
+          <div class="stat-val" id="stat-meetings">12</div>
+          <div class="stat-label">Active Meetings</div>
+          <div class="stat-delta up"><i class="fa-solid fa-arrow-up"></i> +3 today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-val" id="stat-participants">84</div>
+          <div class="stat-label">Participants</div>
+          <div class="stat-delta up"><i class="fa-solid fa-arrow-up"></i> +12 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fa-solid fa-clipboard-check"></i></div>
+          <div class="stat-val" id="stat-assessments">37</div>
+          <div class="stat-label">Assessments Done</div>
+          <div class="stat-delta up"><i class="fa-solid fa-arrow-up"></i> +5 today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fa-solid fa-key"></i></div>
+          <div class="stat-val">3</div>
+          <div class="stat-label">API Keys Active</div>
+          <div class="stat-delta up"><i class="fa-solid fa-circle-check"></i> All healthy</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Recent Assessments</div><div class="card-sub">Last 5 completed</div></div>
+            <button class="btn btn-ghost" style="font-size:.8rem" onclick="switchSection('assessments')">View All</button>
+          </div>
+          <div id="recent-assessments-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">API Health</div><div class="card-sub">Real-time status</div></div>
+            <button class="btn btn-ghost" style="font-size:.8rem" onclick="checkAPIHealth()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          </div>
+          <div id="api-health-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MEETINGS ═══ -->
+    <div id="sec-meetings" class="section">
+      <div class="page-header">
+        <h1>Meetings</h1>
+        <p>WebRTC-powered video sessions for AI assessments.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:22px">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Live Session</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline" onclick="toast('Sharing screen…','info')"><i class="fa-solid fa-display"></i> Share</button>
+              <button class="btn btn-primary" onclick="openModal('newMeetingModal')"><i class="fa-solid fa-plus"></i> New</button>
+            </div>
+          </div>
+          <div class="video-grid" id="video-grid"></div>
+          <div class="cam-controls">
+            <button class="cam-btn on" id="mic-btn" onclick="toggleMic(this)" title="Mute"><i class="fa-solid fa-microphone"></i></button>
+            <button class="cam-btn on" id="cam-btn" onclick="toggleCam(this)" title="Camera"><i class="fa-solid fa-video"></i></button>
+            <button class="cam-btn on" onclick="toast('Hand raised!','success')"><i class="fa-solid fa-hand"></i></button>
+            <button class="cam-btn on" onclick="toast('Chat opened','info')"><i class="fa-solid fa-comment"></i></button>
+            <button class="cam-btn end" onclick="endMeeting()"><i class="fa-solid fa-phone-slash"></i> End</button>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Participants</div><span class="sidebar-badge" style="background:var(--green)">Live</span></div>
+            <div class="participants-grid" id="participants-list" style="grid-template-columns:1fr"></div>
+          </div>
+          <div class="card" style="margin-top:0">
+            <div class="card-header"><div class="card-title">Meeting Info</div></div>
+            <div style="font-size:.85rem;display:flex;flex-direction:column;gap:10px">
+              <div><span style="color:var(--text-muted)">Meeting ID</span><br><strong>AIH-2025-0892</strong></div>
+              <div><span style="color:var(--text-muted)">WebRTC Status</span><br><strong style="color:var(--green)">● Connected</strong></div>
+              <div><span style="color:var(--text-muted)">Duration</span><br><strong id="meeting-timer">00:00:00</strong></div>
+              <div><span style="color:var(--text-muted)">Encryption</span><br><strong>AES-256 End-to-End</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ASSESSMENTS ═══ -->
+    <div id="sec-assessments" class="section">
+      <div class="page-header">
+        <h1>Assessments</h1>
+        <p>Manage and review all candidate assessments.</p>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div class="tabs">
+          <button class="tab active" onclick="filterAssessments('all', this)">All</button>
+          <button class="tab" onclick="filterAssessments('active', this)">Active</button>
+          <button class="tab" onclick="filterAssessments('pending', this)">Pending</button>
+          <button class="tab" onclick="filterAssessments('closed', this)">Closed</button>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> Export</button>
+          <button class="btn btn-primary" onclick="openModal('newAssessmentModal')"><i class="fa-solid fa-plus"></i> New Assessment</button>
+        </div>
+      </div>
+      <div id="assessment-list"></div>
+    </div>
+
+    <!-- ═══ TRANSLATION ═══ -->
+    <div id="sec-translation" class="section">
+      <div class="page-header">
+        <h1>Translation</h1>
+        <p>Real-time speech recognition &amp; synthesis via Translation API.</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Live Translation</div><div class="card-sub">Powered by Translation API</div></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--green);font-weight:600"><span class="status-dot"></span> API Connected</div>
+        </div>
+        <div class="translate-grid">
+          <div>
+            <label class="form-label">From Language</label>
+            <select class="lang-select" id="src-lang">
+              <option value="en">English</option><option value="hi">Hindi</option><option value="es">Spanish</option>
+              <option value="fr">French</option><option value="de">German</option><option value="zh">Chinese</option>
+              <option value="ar">Arabic</option><option value="ja">Japanese</option><option value="pt">Portuguese</option>
+            </select>
+            <div style="margin-top:10px">
+              <label class="form-label">Input Text</label>
+              <textarea class="translate-input" id="translate-src" placeholder="Type or speak to translate…"></textarea>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">To Language</label>
+            <select class="lang-select" id="dst-lang">
+              <option value="hi">Hindi</option><option value="en">English</option><option value="es">Spanish</option>
+              <option value="fr">French</option><option value="de">German</option><option value="zh">Chinese</option>
+              <option value="ar">Arabic</option><option value="ja">Japanese</option><option value="pt">Portuguese</option>
+            </select>
+            <div style="margin-top:10px">
+              <label class="form-label">Translation Output</label>
+              <div class="translate-output" id="translate-dst">Translation will appear here…</div>
+            </div>
+          </div>
+        </div>
+        <div class="translate-actions">
+          <button class="btn btn-primary" onclick="translateText()"><i class="fa-solid fa-language"></i> Translate</button>
+          <button class="btn btn-outline" id="mic-translate-btn" onclick="startSpeechRecognition()"><i class="fa-solid fa-microphone"></i> Speak</button>
+          <button class="btn btn-ghost" onclick="speakTranslation()"><i class="fa-solid fa-volume-high"></i> Play</button>
+          <button class="btn btn-ghost" onclick="copyTranslation()"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Translation History</div></div>
+        <div id="translation-history" style="font-size:.88rem;display:flex;flex-direction:column;gap:10px">
+          <div style="color:var(--text-muted);text-align:center;padding:20px">No translations yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ API KEYS ═══ -->
+    <div id="sec-apikeys" class="section">
+      <div class="page-header">
+        <h1>API Keys</h1>
+        <p>Manage authentication credentials for all integrated APIs.</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Integrated API Keys</div><div class="card-sub">3 keys configured · All active</div></div>
+          <button class="btn btn-primary" onclick="openModal('addKeyModal')"><i class="fa-solid fa-plus"></i> Add Key</button>
+        </div>
+        <table class="api-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Key</th><th>Status</th><th>Last Used</th><th>Actions</th></tr></thead>
+          <tbody id="api-keys-tbody"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">API Usage</div></div>
+        <div style="display:flex;flex-direction:column;gap:16px" id="api-usage"></div>
+      </div>
+    </div>
+
+    <!-- ═══ ADMIN ═══ -->
+    <div id="sec-admin" class="section">
+      <div id="admin-login-view">
+        <div class="login-wrap">
+          <div class="login-card">
+            <div class="login-logo">
+              <i class="fa-solid fa-user-shield"></i>
+              <h2>Admin Login</h2>
+              <p>Sign in to access admin controls</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" type="email" id="admin-email" placeholder="admin@example.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input class="form-input" type="password" id="admin-pass" placeholder="••••••••••">
+              <div class="form-hint">Use the credentials provided by your system administrator.</div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px" onclick="adminLogin()">
+              <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="admin-dashboard-view" style="display:none">
+        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
+          <div><h1>Admin Panel</h1><p>System configuration &amp; user management.</p></div>
+          <button class="btn btn-ghost" onclick="adminLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">System Settings</div></div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div class="form-group" style="margin:0"><label class="form-label">Platform Name</label><input class="form-input" value="AI Assessment Hub"></div>
+              <div class="form-group" style="margin:0"><label class="form-label">Max Participants</label><input class="form-input" type="number" value="100"></div>
+              <div class="form-group" style="margin:0"><label class="form-label">Session Timeout (min)</label><input class="form-input" type="number" value="60"></div>
+              <button class="btn btn-primary" onclick="toast('Settings saved!','success')"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">User Management</div>
+              <button class="btn btn-outline" onclick="openModal('addUserModal')"><i class="fa-solid fa-plus"></i> Add User</button>
+            </div>
+            <div id="user-list"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="card-header"><div class="card-title">System Logs</div>
+            <button class="btn btn-ghost" onclick="clearLogs()"><i class="fa-solid fa-trash"></i> Clear</button>
+          </div>
+          <div id="sys-logs" style="font-family:monospace;font-size:.78rem;background:var(--text);color:#a3e635;padding:16px;border-radius:9px;max-height:220px;overflow-y:auto;line-height:1.7"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══ MODALS ══ -->
+<div class="modal-overlay" id="newMeetingModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title"><i class="fa-solid fa-video" style="color:var(--blue)"></i> New Meeting</div><button class="modal-close" onclick="closeModal('newMeetingModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Meeting Title</label><input class="form-input" id="mtg-title" placeholder="e.g. Technical Assessment Round 2"></div>
+      <div class="form-group"><label class="form-label">Participants (emails, comma separated)</label><input class="form-input" id="mtg-participants" placeholder="candidate@example.com, interviewer@example.com"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="mtg-date"></div>
+        <div class="form-group"><label class="form-label">Time</label><input class="form-input" type="time" id="mtg-time"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Assessment Type</label>
+        <select class="form-input">
+          <option>Technical Interview</option><option>Coding Assessment</option><option>Behavioral Interview</option><option>AI Aptitude Test</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('newMeetingModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createMeeting()"><i class="fa-solid fa-video"></i> Create Meeting</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="newAssessmentModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title"><i class="fa-solid fa-clipboard-list" style="color:var(--blue)"></i> New Assessment</div><button class="modal-close" onclick="closeModal('newAssessmentModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Candidate Name</label><input class="form-input" id="asmnt-name" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Assessment Title</label><input class="form-input" id="asmnt-title" placeholder="e.g. AI Engineer Screening"></div>
+      <div class="form-group"><label class="form-label">Category</label>
+        <select class="form-input" id="asmnt-cat">
+          <option>Machine Learning</option><option>Data Science</option><option>Software Engineering</option><option>Product Management</option><option>Design</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Duration (minutes)</label><input class="form-input" type="number" id="asmnt-dur" value="60"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('newAssessmentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createAssessment()"><i class="fa-solid fa-plus"></i> Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addKeyModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title"><i class="fa-solid fa-key" style="color:var(--blue)"></i> Add API Key</div><button class="modal-close" onclick="closeModal('addKeyModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Key Name</label><input class="form-input" id="key-name" placeholder="e.g. Production WebRTC Key"></div>
+      <div class="form-group"><label class="form-label">Key Type</label>
+        <select class="form-input" id="key-type">
+          <option value="webrtc">WebRTC</option><option value="translation">Translation</option><option value="backup">Backup</option><option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">API Key Value</label><input class="form-input" id="key-value" placeholder="Paste your API key here"><div class="form-hint">Key will be masked after saving.</div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addKeyModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addAPIKey()"><i class="fa-solid fa-plus"></i> Add Key</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add User</div><button class="modal-close" onclick="closeModal('addUserModal')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="user-name" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="user-email" placeholder="user@example.com"></div>
+      <div class="form-group"><label class="form-label">Role</label>
+        <select class="form-input" id="user-role">
+          <option>Assessor</option><option>Admin</option><option>Viewer</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addUser()">Add User</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const state = {
+  apiKeys: [
+    { id:1, name:'WebRTC API Key',     type:'webrtc',      key:'YOUR_WEBRTC_API_KEY_HERE',      status:true,  lastUsed:'Just now',    usage:72 },
+    { id:2, name:'Translation API Key',type:'translation', key:'YOUR_TRANSLATION_API_KEY_HERE', status:true,  lastUsed:'2 min ago',   usage:45 },
+    { id:3, name:'Backup API Key',     type:'backup',      key:'YOUR_BACKUP_API_KEY_HERE',      status:true,  lastUsed:'1 hr ago',    usage:18 },
+  ],
+  assessments: [
+    { id:1, name:'Priya Sharma',    title:'ML Engineer Screening',    cat:'Machine Learning', score:88, status:'active',  date:'May 15, 2025', dur:60 },
+    { id:2, name:'Rahul Verma',     title:'Data Analyst Assessment',  cat:'Data Science',     score:74, status:'closed',  date:'May 14, 2025', dur:45 },
+    { id:3, name:'Ananya Gupta',    title:'Backend Engineer Round 1', cat:'Software Engineering', score:91, status:'active', date:'May 15, 2025', dur:90 },
+    { id:4, name:'Vikram Singh',    title:'AI Aptitude Test',        cat:'Machine Learning', score:0,  status:'pending', date:'May 16, 2025', dur:30 },
+    { id:5, name:'Meera Nair',      title:'Product Manager Interview',cat:'Product Management', score:83, status:'closed', date:'May 13, 2025', dur:60 },
+  ],
+  users: [
+    { name:'Admin User',   email:'admin@example.com',   role:'Admin' },
+    { name:'Anil Kumar',   email:'anil@example.com',    role:'Assessor' },
+    { name:'Sunita Rao',   email:'sunita@example.com',  role:'Viewer' },
+  ],
+  meetings: [
+    { name:'Priya Sharma',    color:'#0E71EB', self:true },
+    { name:'Rahul (Assessor)',color:'#00C896', speaking:true },
+    { name:'Ananya Gupta',    color:'#FF8C00', self:false },
+    { name:'Vikram Singh',    color:'#E53935', self:false },
+  ],
+  translationHistory: [],
+  meetingStart: Date.now(),
+  adminLoggedIn: false,
+  logs: [],
+};
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+function initApp() {
+  document.getElementById('loading').classList.add('hide');
+  renderAll();
+  startMeetingTimer();
+  addLog('System initialized — all APIs online');
+  addLog('WebRTC connection established');
+  addLog('Translation API authenticated');
+}
+
+// Dismiss loader after 2s max, no matter what external resources do
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(initApp, 2000));
+} else {
+  setTimeout(initApp, 2000);
+}
+
+function renderAll() {
+  renderAPIKeys();
+  renderAPIHealth();
+  renderAPIUsage();
+  renderAssessments();
+  renderRecentAssessments();
+  renderVideoGrid();
+  renderParticipants();
+  renderUsers();
+  renderLogs();
+}
+
+// ══════════════════════════════════════════
+//  SECTION SWITCHING
+// ══════════════════════════════════════════
+function switchSection(id, navEl, sideEl) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(l => l.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  if (sideEl) sideEl.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show')); });
+document.querySelectorAll && document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('show');
+});
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+function toast(msg, type='success') {
+  const icons = { success:'fa-circle-check', error:'fa-circle-xmark', info:'fa-circle-info' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fa-solid ${icons[type]||icons.info}"></i>${msg}`;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.classList.add('show'), 20);
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3200);
+}
+
+// ══════════════════════════════════════════
+//  API KEYS
+// ══════════════════════════════════════════
+function maskKey(k) { if(!k||k.length<12) return k; return k.slice(0,6)+'••••••'+k.slice(-4); }
+
+function renderAPIKeys() {
+  const tb = document.getElementById('api-keys-tbody');
+  if(!tb) return;
+  tb.innerHTML = state.apiKeys.map(k => `
+    <tr>
+      <td><strong>${k.name}</strong></td>
+      <td><span class="key-type ${k.type}">${k.type.charAt(0).toUpperCase()+k.type.slice(1)}</span></td>
+      <td><div class="key-badge"><i class="fa-solid fa-key" style="color:var(--text-muted)"></i><span>${maskKey(k.key)}</span></div></td>
+      <td>${k.status ? '<span style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--green)"><span class="status-dot"></span>Active</span>' : '<span style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text-muted)"><span class="status-dot inactive"></span>Inactive</span>'}</td>
+      <td style="color:var(--text-muted);font-size:.83rem">${k.lastUsed}</td>
+      <td>
+        <div class="action-btns">
+          <button class="icon-btn copy" title="Copy key" onclick="copyKey(${k.id})"><i class="fa-solid fa-copy"></i></button>
+          <button class="icon-btn" title="Toggle" onclick="toggleKey(${k.id})"><i class="fa-solid fa-toggle-${k.status?'on':'off'}"></i></button>
+          <button class="icon-btn del" title="Delete" onclick="deleteKey(${k.id})"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderAPIHealth() {
+  const el = document.getElementById('api-health-list');
+  if(!el) return;
+  const health = [
+    { name:'WebRTC API',     ping:'12ms', status:'Operational', icon:'fa-tower-broadcast', color:'green' },
+    { name:'Translation API',ping:'34ms', status:'Operational', icon:'fa-language', color:'green' },
+    { name:'Backup API',     ping:'67ms', status:'Operational', icon:'fa-database', color:'green' },
+  ];
+  el.innerHTML = health.map(h => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div class="stat-icon ${h.color}" style="width:36px;height:36px;font-size:.85rem"><i class="fa-solid ${h.icon}"></i></div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.88rem">${h.name}</div>
+        <div style="font-size:.78rem;color:var(--text-muted)">Ping: ${h.ping}</div>
+      </div>
+      <span style="font-size:.78rem;font-weight:600;color:var(--green)">● ${h.status}</span>
+    </div>
+  `).join('');
+}
+
+function renderAPIUsage() {
+  const el = document.getElementById('api-usage');
+  if(!el) return;
+  el.innerHTML = state.apiKeys.map(k => `
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.85rem">
+        <span style="font-weight:600">${k.name}</span><span style="color:var(--text-muted)">${k.usage}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill ${k.usage>70?'':'green'}" style="width:${k.usage}%"></div></div>
+    </div>
+  `).join('');
+}
+
+function copyKey(id) {
+  const k = state.apiKeys.find(x=>x.id===id);
+  if(!k) return;
+  navigator.clipboard && navigator.clipboard.writeText(k.key).then(()=>toast('Key copied to clipboard','success')).catch(()=>toast('Copy failed','error'));
+  if(!navigator.clipboard) toast('Key: '+maskKey(k.key),'info');
+  addLog(`API key "${k.name}" copied`);
+}
+
+function toggleKey(id) {
+  const k = state.apiKeys.find(x=>x.id===id);
+  if(!k) return;
+  k.status = !k.status;
+  renderAPIKeys();
+  toast(`Key ${k.status?'enabled':'disabled'}: ${k.name}`, k.status?'success':'info');
+  addLog(`Key "${k.name}" ${k.status?'enabled':'disabled'}`);
+}
+
+function deleteKey(id) {
+  const k = state.apiKeys.find(x=>x.id===id);
+  if(!k) return;
+  if(!confirm(`Delete "${k.name}"?`)) return;
+  state.apiKeys = state.apiKeys.filter(x=>x.id!==id);
+  renderAPIKeys(); renderAPIUsage(); renderAPIHealth();
+  toast('API key deleted','error');
+  addLog(`API key "${k.name}" deleted`);
+}
+
+function addAPIKey() {
+  const name = document.getElementById('key-name').value.trim();
+  const type = document.getElementById('key-type').value;
+  const key  = document.getElementById('key-value').value.trim();
+  if(!name||!key){ toast('Please fill all fields','error'); return; }
+  const newId = Math.max(0,...state.apiKeys.map(k=>k.id))+1;
+  state.apiKeys.push({ id:newId, name, type, key, status:true, lastUsed:'Just now', usage:0 });
+  renderAPIKeys(); renderAPIUsage();
+  closeModal('addKeyModal');
+  document.getElementById('key-name').value='';
+  document.getElementById('key-value').value='';
+  toast(`API key "${name}" added!`,'success');
+  addLog(`New API key added: "${name}"`);
+}
+
+function checkAPIHealth() { renderAPIHealth(); toast('API health refreshed','info'); }
+
+// ══════════════════════════════════════════
+//  ASSESSMENTS
+// ══════════════════════════════════════════
+let assessmentFilter = 'all';
+const catColors = { 'Machine Learning':'blue','Data Science':'green','Software Engineering':'orange','Product Management':'red','Design':'blue' };
+
+function renderAssessments(filter) {
+  if(filter) assessmentFilter = filter;
+  const el = document.getElementById('assessment-list');
+  if(!el) return;
+  const list = assessmentFilter==='all' ? state.assessments : state.assessments.filter(a=>a.status===assessmentFilter);
+  el.innerHTML = list.map(a => `
+    <div class="assessment-item" onclick="toast('Opening assessment for ${a.name}…','info')">
+      <div class="assessment-icon ${catColors[a.cat]||'blue'}" style="background:var(--blue-light)"><i class="fa-solid fa-clipboard-list" style="color:var(--blue)"></i></div>
+      <div class="assessment-info">
+        <h4>${a.title}</h4>
+        <p>${a.name} · ${a.cat} · ${a.dur} min</p>
+      </div>
+      <div style="flex:1;padding:0 16px">
+        ${a.score>0?`<div class="progress-bar"><div class="progress-fill ${a.score>=80?'green':a.score>=60?'':'orange'}" style="width:${a.score}%"></div></div><div style="font-size:.75rem;color:var(--text-muted);margin-top:4px">${a.score}/100</div>`:'<span style="font-size:.82rem;color:var(--text-muted)">Not started</span>'}
+      </div>
+      <div class="assessment-meta">
+        <div><span class="chip ${a.status}">${a.status.charAt(0).toUpperCase()+a.status.slice(1)}</span></div>
+        <div class="date" style="margin-top:4px">${a.date}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="text-align:center;color:var(--text-muted);padding:30px">No assessments found.</div>';
+}
+
+function renderRecentAssessments() {
+  const el = document.getElementById('recent-assessments-list');
+  if(!el) return;
+  el.innerHTML = state.assessments.slice(0,4).map(a => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="stat-icon blue" style="width:34px;height:34px;font-size:.8rem;flex-shrink:0"><i class="fa-solid fa-user"></i></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:.87rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</div>
+        <div style="font-size:.75rem;color:var(--text-muted)">${a.title}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        ${a.score>0?`<div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--blue)">${a.score}</div>`:'<span style="font-size:.75rem;color:var(--text-muted)">Pending</span>'}
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterAssessments(f, el) {
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderAssessments(f);
+}
+
+function createAssessment() {
+  const name  = document.getElementById('asmnt-name').value.trim();
+  const title = document.getElementById('asmnt-title').value.trim();
+  const cat   = document.getElementById('asmnt-cat').value;
+  const dur   = parseInt(document.getElementById('asmnt-dur').value)||60;
+  if(!name||!title){ toast('Please fill all fields','error'); return; }
+  const newId = Math.max(0,...state.assessments.map(a=>a.id))+1;
+  state.assessments.unshift({ id:newId, name, title, cat, score:0, status:'pending', date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), dur });
+  renderAssessments(); renderRecentAssessments();
+  closeModal('newAssessmentModal');
+  document.getElementById('asmnt-name').value='';
+  document.getElementById('asmnt-title').value='';
+  toast(`Assessment created for ${name}`,'success');
+  addLog(`New assessment created: "${title}" for ${name}`);
+  state.stats_assessments = (state.stats_assessments||37)+1;
+  const sv = document.getElementById('stat-assessments');
+  if(sv) sv.textContent = parseInt(sv.textContent)+1;
+}
+
+// ══════════════════════════════════════════
+//  MEETINGS / VIDEO
+// ══════════════════════════════════════════
+function renderVideoGrid() {
+  const el = document.getElementById('video-grid');
+  if(!el) return;
+  el.innerHTML = state.meetings.map(m=>`
+    <div class="video-tile ${m.self?'self':''} ${m.speaking?'speaking':''}">
+      <i class="fa-solid fa-user cam-off"></i>
+      <div class="tile-name">${m.name}${m.self?' (You)':''}</div>
+      <div class="tile-mic"><i class="fa-solid fa-microphone-slash"></i></div>
+    </div>
+  `).join('');
+}
+
+function renderParticipants() {
+  const el = document.getElementById('participants-list');
+  if(!el) return;
+  el.innerHTML = state.meetings.map(m=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+      <div class="avatar" style="background:${m.color};width:32px;height:32px;font-size:.75rem">${m.name.charAt(0)}</div>
+      <div style="flex:1;font-size:.87rem;font-weight:500">${m.name}${m.self?' <span style=\'font-size:.73rem;color:var(--text-muted)\'>(You)</span>':''}</div>
+      <div style="color:${m.speaking?'var(--green)':'var(--text-muted)'};font-size:.8rem"><i class="fa-solid fa-microphone${m.speaking?'':'-slash'}"></i></div>
+    </div>
+  `).join('');
+}
+
+function toggleMic(btn) {
+  const on = btn.classList.toggle('off');
+  btn.classList.toggle('on');
+  btn.innerHTML = on ? '<i class="fa-solid fa-microphone-slash"></i>' : '<i class="fa-solid fa-microphone"></i>';
+  toast(on ? 'Microphone muted' : 'Microphone on', 'info');
+}
+function toggleCam(btn) {
+  const off = btn.classList.toggle('off');
+  btn.classList.toggle('on');
+  btn.innerHTML = off ? '<i class="fa-solid fa-video-slash"></i>' : '<i class="fa-solid fa-video"></i>';
+  toast(off ? 'Camera off' : 'Camera on', 'info');
+}
+function endMeeting() { if(confirm('End this meeting?')) { toast('Meeting ended','error'); addLog('Meeting session ended'); } }
+
+function startMeetingTimer() {
+  setInterval(() => {
+    const el = document.getElementById('meeting-timer');
+    if(!el) return;
+    const s = Math.floor((Date.now()-state.meetingStart)/1000);
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+    const sec = String(s%60).padStart(2,'0');
+    el.textContent = `${h}:${m}:${sec}`;
+  }, 1000);
+}
+
+function createMeeting() {
+  const title = document.getElementById('mtg-title').value.trim();
+  if(!title){ toast('Please enter a meeting title','error'); return; }
+  closeModal('newMeetingModal');
+  toast(`Meeting "${title}" created!`,'success');
+  addLog(`Meeting created: "${title}"`);
+  const sv = document.getElementById('stat-meetings');
+  if(sv) sv.textContent = parseInt(sv.textContent)+1;
+}
+
+// ══════════════════════════════════════════
+//  TRANSLATION
+// ══════════════════════════════════════════
+const translations = {
+  'hello': { hi:'नमस्ते', es:'Hola', fr:'Bonjour', de:'Hallo', zh:'你好', ar:'مرحبا', ja:'こんにちは', pt:'Olá' },
+  'how are you': { hi:'आप कैसे हैं?', es:'¿Cómo estás?', fr:'Comment allez-vous?', de:'Wie geht es Ihnen?', zh:'你好吗?', ar:'كيف حالك؟', ja:'お元気ですか？', pt:'Como vai você?' },
+  'thank you': { hi:'धन्यवाद', es:'Gracias', fr:'Merci', de:'Danke', zh:'谢谢', ar:'شكراً', ja:'ありがとう', pt:'Obrigado' },
+  'good morning': { hi:'शुभ प्रभात', es:'Buenos días', fr:'Bonjour', de:'Guten Morgen', zh:'早上好', ar:'صباح الخير', ja:'おはようございます', pt:'Bom dia' },
+};
+
+function translateText() {
+  const src = document.getElementById('translate-src').value.trim();
+  const dst = document.getElementById('dst-lang').value;
+  if(!src){ toast('Enter text to translate','error'); return; }
+  const key = src.toLowerCase();
+  let result = null;
+  for(const [phrase, map] of Object.entries(translations)) {
+    if(key.includes(phrase) && map[dst]) { result = map[dst]; break; }
+  }
+  if(!result) {
+    const langs = { hi:'Hindi', es:'Spanish', fr:'French', de:'German', zh:'Chinese', ar:'Arabic', ja:'Japanese', pt:'Portuguese', en:'English' };
+    result = `[Translated to ${langs[dst]||dst}]: ${src}`;
+  }
+  document.getElementById('translate-dst').textContent = result;
+  addToTranslationHistory(src, result);
+  toast('Translation complete!','success');
+  addLog(`Text translated to ${dst}`);
+}
+
+function addToTranslationHistory(src, dst) {
+  state.translationHistory.unshift({ src, dst, time: new Date().toLocaleTimeString() });
+  if(state.translationHistory.length>10) state.translationHistory.pop();
+  const el = document.getElementById('translation-history');
+  if(!el) return;
+  el.innerHTML = state.translationHistory.map(h=>`
+    <div style="padding:10px;background:var(--surface2);border-radius:9px">
+      <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">${h.time}</div>
+      <div><strong>${h.src}</strong> → <span style="color:var(--blue)">${h.dst}</span></div>
+    </div>
+  `).join('');
+}
+
+function startSpeechRecognition() {
+  if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){
+    toast('Speech Recognition not supported in this browser','error'); return;
+  }
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r = new SR();
+  r.lang = document.getElementById('src-lang').value;
+  r.onresult = e => {
+    document.getElementById('translate-src').value = e.results[0][0].transcript;
+    toast('Speech captured!','success');
+    translateText();
+  };
+  r.onerror = () => toast('Speech recognition error','error');
+  r.start();
+  toast('Listening… speak now','info');
+}
+
+function speakTranslation() {
+  const text = document.getElementById('translate-dst').textContent;
+  if(!text||text.includes('appear here')){ toast('Nothing to speak','error'); return; }
+  if(!window.speechSynthesis){ toast('Speech Synthesis not supported','error'); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = document.getElementById('dst-lang').value;
+  window.speechSynthesis.speak(u);
+  toast('Playing translation…','info');
+}
+
+function copyTranslation() {
+  const text = document.getElementById('translate-dst').textContent;
+  navigator.clipboard && navigator.clipboard.writeText(text).then(()=>toast('Translation copied','success'));
+}
+
+// ══════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════
+function adminLogin() {
+  const email = document.getElementById('admin-email').value.trim();
+  const pass  = document.getElementById('admin-pass').value;
+  if(!email||!pass){ toast('Enter email and password','error'); return; }
+  // Demo: accept any credentials for UI demo purposes
+  state.adminLoggedIn = true;
+  document.getElementById('admin-login-view').style.display  = 'none';
+  document.getElementById('admin-dashboard-view').style.display = 'block';
+  toast(`Welcome back, Admin!`,'success');
+  addLog(`Admin login: ${email}`);
+}
+
+function adminLogout() {
+  state.adminLoggedIn = false;
+  document.getElementById('admin-login-view').style.display  = '';
+  document.getElementById('admin-dashboard-view').style.display = 'none';
+  document.getElementById('admin-email').value = '';
+  document.getElementById('admin-pass').value  = '';
+  toast('Logged out','info');
+  addLog('Admin logged out');
+}
+
+function renderUsers() {
+  const el = document.getElementById('user-list');
+  if(!el) return;
+  el.innerHTML = state.users.map((u,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="avatar" style="background:#${['0E71EB','00C896','FF8C00'][i%3]}">${u.name.charAt(0)}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.88rem">${u.name}</div>
+        <div style="font-size:.75rem;color:var(--text-muted)">${u.email}</div>
+      </div>
+      <span class="chip active" style="font-size:.72rem">${u.role}</span>
+      <button class="icon-btn del" onclick="removeUser(${i})"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  `).join('');
+}
+
+function addUser() {
+  const name  = document.getElementById('user-name').value.trim();
+  const email = document.getElementById('user-email').value.trim();
+  const role  = document.getElementById('user-role').value;
+  if(!name||!email){ toast('Fill all fields','error'); return; }
+  state.users.push({ name, email, role });
+  renderUsers();
+  closeModal('addUserModal');
+  document.getElementById('user-name').value='';
+  document.getElementById('user-email').value='';
+  toast(`User "${name}" added`,'success');
+  addLog(`New user added: ${name} (${role})`);
+}
+
+function removeUser(i) {
+  if(!confirm('Remove this user?')) return;
+  const u = state.users.splice(i,1)[0];
+  renderUsers();
+  toast(`User "${u.name}" removed`,'error');
+  addLog(`User removed: ${u.name}`);
+}
+
+// ══════════════════════════════════════════
+//  LOGS
+// ══════════════════════════════════════════
+function addLog(msg) {
+  const t = new Date().toLocaleTimeString();
+  state.logs.unshift(`[${t}] ${msg}`);
+  if(state.logs.length>50) state.logs.pop();
+  renderLogs();
+}
+function renderLogs() {
+  const el = document.getElementById('sys-logs');
+  if(!el) return;
+  el.innerHTML = state.logs.join('<br>') || '<span style="color:#6b7280">No logs yet.</span>';
+}
+function clearLogs() { state.logs=[]; renderLogs(); toast('Logs cleared','info'); }
+
+// ══════════════════════════════════════════
+//  CSV EXPORT
+// ══════════════════════════════════════════
+function exportCSV() {
+  const headers = ['ID','Candidate','Title','Category','Score','Status','Date','Duration'];
+  const rows = state.assessments.map(a=>[a.id,a.name,a.title,a.cat,a.score,a.status,a.date,a.dur+'min']);
+  const csv = [headers, ...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'assessments_export.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exported successfully!','success');
+  addLog('Assessments exported to CSV');
+}
+</script>
+</body>
+</html>
